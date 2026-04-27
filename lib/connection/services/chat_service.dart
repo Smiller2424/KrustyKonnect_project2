@@ -1,30 +1,45 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../repositories/chat_repository.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class ChatService {
-  ChatService({ChatRepository? repository})
-      : _repository = repository ?? ChatRepository();
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  final ChatRepository _repository;
+  String get currentUserId => _auth.currentUser!.uid;
 
-  Future<String> openChat({
-    required String currentUserId,
-    required String otherUserId,
-  }) {
-    return _repository.createOrOpenChat(
-      currentUserId: currentUserId,
-      otherUserId: otherUserId,
-    );
+  Stream<QuerySnapshot<Map<String, dynamic>>> getUserChats() {
+    return _firestore
+        .collection('chats')
+        .where('memberIds', arrayContains: currentUserId)
+        .orderBy('lastMessageAt', descending: true)
+        .snapshots();
   }
 
-  Stream<QuerySnapshot<Map<String, dynamic>>> getUserChats(
-    String currentUserId,
-  ) {
-    return _repository.watchUserChats(currentUserId);
+  Stream<QuerySnapshot<Map<String, dynamic>>> getMessages(String chatId) {
+    return _firestore
+        .collection('chats')
+        .doc(chatId)
+        .collection('messages')
+        .orderBy('createdAt', descending: true)
+        .snapshots();
   }
 
-  Future<Map<String, dynamic>?> getChatData(String chatId) async {
-    final doc = await _repository.getChat(chatId);
-    return doc.data();
+  Future<void> sendMessage({
+    required String chatId,
+    required String text,
+  }) async {
+    final trimmedText = text.trim();
+    if (trimmedText.isEmpty) return;
+
+    await _firestore.collection('chats').doc(chatId).collection('messages').add({
+      'senderId': currentUserId,
+      'text': trimmedText,
+      'createdAt': FieldValue.serverTimestamp(),
+    });
+
+    await _firestore.collection('chats').doc(chatId).update({
+      'lastMessage': trimmedText,
+      'lastMessageAt': FieldValue.serverTimestamp(),
+    });
   }
 }

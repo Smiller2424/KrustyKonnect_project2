@@ -18,7 +18,7 @@ class ChatListScreen extends StatelessWidget {
         title: const Text('Chats'),
       ),
       body: StreamBuilder(
-        stream: chatService.getUserChats(currentUserId),
+        stream: chatService.getUserChats(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
