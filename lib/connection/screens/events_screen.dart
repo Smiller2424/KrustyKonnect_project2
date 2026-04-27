@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../services/event_service.dart';
+import 'widgets/event_card.dart';
 
 class EventsScreen extends StatelessWidget {
   final EventService _eventService = EventService();
@@ -25,31 +26,9 @@ class EventsScreen extends StatelessWidget {
           return ListView.builder(
             itemCount: events.length,
             itemBuilder: (context, index) {
-              final event = events[index];
-              final data = event.data() as Map<String, dynamic>;
+              final data = events[index].data() as Map<String, dynamic>;
 
-              return Card(
-                margin: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 6,
-                ),
-                child: ListTile(
-                  title: Text(data['title'] ?? 'No Title'),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(data['description'] ?? ''),
-                      const SizedBox(height: 4),
-                      Text(
-                        (data['date'] as Timestamp)
-                          .toDate()
-                          .toString(),
-                        style: const TextStyle(fontSize: 12),
-                      ),
-                    ],
-                  ),
-                ),
-              );
+              return EventCard(data: data);
             },
           );
         },
