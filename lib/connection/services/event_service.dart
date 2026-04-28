@@ -10,21 +10,43 @@ class EventService {
     required String description,
     required DateTime date,
     required String createdBy,
+    required String location,
   }) async {
-    try {
-      await _eventRepository.createEvent(
-        title: title,
-        description: description,
-        date: date,
-        createdBy: createdBy,
-      );
-    } catch (e) {
-      throw Exception('Failed to create event: $e');
-    }
+    await _eventRepository.createEvent(
+      title: title,
+      description: description,
+      date: date,
+      createdBy: createdBy,
+      location: location, 
+    );
   }
 
   //to get event for UI
   Stream<QuerySnapshot> getEvents() {
     return _eventRepository.getEvents();
+  }
+
+  //rsvp that theyre coming
+  Future<void> rsvpToEvent({
+    required String eventId,
+    required String userId,
+  }) {
+    return _eventRepository.updateAttendees(
+      eventId: eventId,
+      userId: userId,
+      isComing: true,
+    );
+  }
+
+  //rsvp not coming
+  Future<void> cancelRsvp({
+    required String eventId,
+    required String userId,
+  }) {
+    return _eventRepository.updateAttendees(
+      eventId: eventId,
+      userId: userId,
+      isComing: false,
+    );
   }
 }
