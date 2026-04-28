@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../services/event_service.dart';
 import 'widgets/event_card.dart';
+import 'create_event_screen.dart';
+import 'event_details_screen.dart';
 
 class EventsScreen extends StatelessWidget {
   final EventService _eventService = EventService();
@@ -26,12 +28,34 @@ class EventsScreen extends StatelessWidget {
           return ListView.builder(
             itemCount: events.length,
             itemBuilder: (context, index) {
-              final data = events[index].data() as Map<String, dynamic>;
+              final doc = events[index];
+              final data = doc.data() as Map<String, dynamic>;
 
-              return EventCard(data: data);
+              return GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => EventDetailsScreen(
+                      eventId: doc.id,
+                      currentUserId: 'testUser',
+                    )),
+                  );
+                },
+                child: EventCard(data: data),
+              );
             },
           );
         },
+      ),
+      //button to go to create event
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const CreateEventScreen()),
+          );
+        },
+        child: const Icon(Icons.add),
       ),
     );
   }
