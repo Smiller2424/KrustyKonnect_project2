@@ -19,7 +19,7 @@ class _HomeShellState extends State<HomeShell> {
   final List<Widget> _screens = [
     FeedScreen(),
     MatchesScreen(),
-    ChatListScreen(currentUserId: FirebaseAuth.instance.currentUser!.uid),
+    ChatListScreen(currentUserId: FirebaseAuth.instance.currentUser?.uid ?? ''),
     EventsScreen(),
     ProfileScreen(),
   ];

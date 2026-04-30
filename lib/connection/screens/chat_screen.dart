@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 import '../services/chat_service.dart';
+import '../services/notification_service.dart';
 import 'widgets/message_bubble.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -20,6 +21,7 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   final ChatService _chatService = ChatService();
+  final NotificationService _notificationService = NotificationService();
   final TextEditingController _messageController = TextEditingController();
 
   Future<void> _sendMessage() async {
@@ -33,6 +35,9 @@ class _ChatScreenState extends State<ChatScreen> {
       chatId: widget.chatId,
       text: text,
     );
+
+    //makes sure to notify other devices
+    await _notificationService.saveDeviceToken();
   }
 
   @override
