@@ -4,6 +4,7 @@ import '../connection/screens/matches_screen.dart';
 import '../connection/screens/chat_list_screen.dart';
 import '../connection/screens/events_screen.dart';
 import '../social/screens/profile_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class HomeShell extends StatefulWidget {
   const HomeShell({super.key});
@@ -18,7 +19,7 @@ class _HomeShellState extends State<HomeShell> {
   final List<Widget> _screens = [
     FeedScreen(),
     MatchesScreen(),
-    ChatListScreen(),
+    ChatListScreen(currentUserId: FirebaseAuth.instance.currentUser!.uid),
     EventsScreen(),
     ProfileScreen(),
   ];
