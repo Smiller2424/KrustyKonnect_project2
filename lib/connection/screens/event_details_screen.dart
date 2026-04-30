@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/event_service.dart';
+import '../services/notification_service.dart';
 
 class EventDetailsScreen extends StatelessWidget {
   final String eventId;
@@ -36,13 +37,13 @@ class EventDetailsScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  event['itle'],
+                  event['title'],
                   style: const TextStyle(fontSize: 20)
                 ),
                 Text("Location: ${event['location']}"),
                 const SizedBox(height: 20),
                 ElevatedButton(
-                  onPressed: () {
+                  onPressed: () async {
                     if(isAttending) {
                       eventService.cancelRsvp(
                         eventId: eventId,
@@ -54,6 +55,7 @@ class EventDetailsScreen extends StatelessWidget {
                         userId: currentUserId,
                       );
                     }
+                    await NotificationService().saveDeviceToken();
                   },
                   //change whether or not they are coming
                   child: Text(isAttending ? "Leave Event" : "Join Event"),
