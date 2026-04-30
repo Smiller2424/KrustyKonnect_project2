@@ -42,6 +42,7 @@ packages:
     source: hosted
     version: "1.1.2"
   cloud_firestore:
+    dependency: "direct main"
     dependency: "direct dev"
     description:
       name: cloud_firestore
@@ -130,6 +131,7 @@ packages:
     source: hosted
     version: "0.9.3+5"
   firebase_auth:
+    dependency: "direct main"
     dependency: "direct dev"
     description:
       name: firebase_auth
@@ -154,6 +156,7 @@ packages:
     source: hosted
     version: "5.15.3"
   firebase_core:
+    dependency: "direct main"
     dependency: "direct dev"
     description:
       name: firebase_core

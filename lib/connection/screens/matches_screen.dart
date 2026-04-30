@@ -43,7 +43,7 @@ class _MatchesScreenState extends State<MatchesScreen> {
       );
 
       setState(() {
-        _matches = matches;
+        _matches = matches.take(5).toList();
         _isLoading = false;
       });
     } catch (e) {
