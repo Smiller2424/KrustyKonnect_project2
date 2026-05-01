@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../../app/home_shell.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -14,18 +16,74 @@ class _LoginScreenState extends State<LoginScreen> {
   bool isPasswordHidden = true;
   bool isLoading = false;
 
+  // LOGIN FUNCTION
   void handleLogin() async {
+    final email = emailController.text.trim();
+    final password = passwordController.text.trim();
+
+    // 🔹 Basic validation
+    if (email.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please enter email and password")),
+      );
+      return;
+    }
+
     setState(() {
       isLoading = true;
     });
 
-    await Future.delayed(const Duration(seconds: 2));
+    try {
+      // Firebase login
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
 
-    setState(() {
-      isLoading = false;
-    });
+       if (!mounted) return;
+
+      // Navigate to home
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const HomeShell(),
+        ),
+      );
+    } on FirebaseAuthException catch (e) {
+      String message = "Login failed";
+
+      switch (e.code) {
+        case 'user-not-found':
+          message = "No user found for that email";
+          break;
+        case 'wrong-password':
+          message = "Incorrect password";
+          break;
+        case 'invalid-email':
+          message = "Invalid email format";
+          break;
+        case 'user-disabled':
+          message = "This account has been disabled";
+          break;
+        default:
+          message = e.message ?? "Something went wrong";
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message)),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Something went wrong")),
+      );
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 
+  // INPUT FIELD BUILDER
   Widget buildInput({
     required TextEditingController controller,
     required String hint,
@@ -76,7 +134,7 @@ class _LoginScreenState extends State<LoginScreen> {
       body: Column(
         children: [
 
-          // TOP HEADER
+          // HEADER
           Container(
             height: 240,
             width: double.infinity,
@@ -85,6 +143,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 colors: [
                   Theme.of(context).colorScheme.primary,
                   const Color(0xFF3A7BD5),
+                  const Color(0xFF00B4DB),
                 ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
@@ -106,10 +165,10 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ),
 
-          // FORM SECTION
+          // FORM
           Expanded(
             child: Transform.translate(
-              offset: const Offset(0, -30), 
+              offset: const Offset(0, -30),
               child: Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
@@ -183,7 +242,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           backgroundColor:
                               Theme.of(context).colorScheme.primary,
                           foregroundColor: Colors.white,
-                          elevation: 3,
+                          elevation: 4,
+                          shadowColor: Colors.black.withValues(alpha: 0.2),
                         ),
                         onPressed: isLoading ? null : handleLogin,
                         child: isLoading
@@ -195,7 +255,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   strokeWidth: 2,
                                 ),
                               )
-                            : const Text("Login"),
+                            : const Text("Sign In"),
                       ),
                     ),
 
