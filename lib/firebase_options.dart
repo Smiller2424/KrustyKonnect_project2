@@ -83,5 +83,4 @@ class DefaultFirebaseOptions {
     authDomain: 'krusty-konnect-app.firebaseapp.com',
     storageBucket: 'krusty-konnect-app.firebasestorage.app',
   );
-
 }
