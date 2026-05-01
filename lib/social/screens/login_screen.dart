@@ -76,7 +76,7 @@ class _LoginScreenState extends State<LoginScreen> {
       body: Column(
         children: [
 
-          // TOP GRADIENT HEADER
+          // TOP HEADER
           Container(
             height: 240,
             width: double.infinity,
@@ -106,139 +106,141 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ),
 
-          // FLOATING FORM CONTAINER
+          // FORM SECTION
           Expanded(
-            child: Container(
-              margin: const EdgeInsets.only(top: -30),
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: Colors.grey[100],
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(24),
+            child: Transform.translate(
+              offset: const Offset(0, -30), 
+              child: Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: Colors.grey[100],
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(24),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.1),
+                      blurRadius: 10,
+                      offset: const Offset(0, -3),
+                    ),
+                  ],
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.1),
-                    blurRadius: 10,
-                    offset: const Offset(0, -3),
-                  ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
 
-                  const SizedBox(height: 10),
+                    const SizedBox(height: 10),
 
-                  Text(
-                    "Welcome Back",
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-
-                  const SizedBox(height: 6),
-
-                  Text(
-                    "Sign in to continue",
-                    style: TextStyle(color: Colors.grey[600]),
-                  ),
-
-                  const SizedBox(height: 30),
-
-                  // EMAIL
-                  buildInput(
-                    controller: emailController,
-                    hint: "Email",
-                    icon: Icons.email,
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  // PASSWORD
-                  buildInput(
-                    controller: passwordController,
-                    hint: "Password",
-                    icon: Icons.lock,
-                    isPassword: true,
-                  ),
-
-                  const SizedBox(height: 12),
-
-                  // FORGOT PASSWORD
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: TextButton(
-                      onPressed: () {},
-                      child: const Text("Forgot Password?"),
+                    Text(
+                      "Welcome Back",
+                      style: Theme.of(context).textTheme.titleLarge,
                     ),
-                  ),
 
-                  const SizedBox(height: 10),
+                    const SizedBox(height: 6),
 
-                  // LOGIN BUTTON (IMPROVED)
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                            Theme.of(context).colorScheme.primary,
-                        foregroundColor: Colors.white,
-                        elevation: 3,
-                      ),
-                      onPressed: isLoading ? null : handleLogin,
-                      child: isLoading
-                          ? const SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                                strokeWidth: 2,
-                              ),
-                            )
-                          : const Text("Login"),
+                    Text(
+                      "Sign in to continue",
+                      style: TextStyle(color: Colors.grey[600]),
                     ),
-                  ),
 
-                  const SizedBox(height: 20),
+                    const SizedBox(height: 30),
 
-                  // DIVIDER
-                  Row(
-                    children: [
-                      Expanded(child: Divider(color: Colors.grey[300])),
-                      const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 10),
-                        child: Text("OR"),
+                    // EMAIL
+                    buildInput(
+                      controller: emailController,
+                      hint: "Email",
+                      icon: Icons.email,
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    // PASSWORD
+                    buildInput(
+                      controller: passwordController,
+                      hint: "Password",
+                      icon: Icons.lock,
+                      isPassword: true,
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    // FORGOT PASSWORD
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton(
+                        onPressed: () {},
+                        child: const Text("Forgot Password?"),
                       ),
-                      Expanded(child: Divider(color: Colors.grey[300])),
-                    ],
-                  ),
+                    ),
 
-                  const SizedBox(height: 20),
+                    const SizedBox(height: 10),
 
-                  // GOOGLE BUTTON
-                  SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton.icon(
-                      style: OutlinedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                    // LOGIN BUTTON
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor:
+                              Theme.of(context).colorScheme.primary,
+                          foregroundColor: Colors.white,
+                          elevation: 3,
                         ),
+                        onPressed: isLoading ? null : handleLogin,
+                        child: isLoading
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Text("Login"),
                       ),
-                      onPressed: () {},
-                      icon: const Icon(Icons.g_mobiledata, size: 28),
-                      label: const Text("Continue with Google"),
                     ),
-                  ),
 
-                  const Spacer(),
+                    const SizedBox(height: 20),
 
-                  // SIGN UP
-                  Center(
-                    child: TextButton(
-                      onPressed: () {},
-                      child: const Text("Don’t have an account? Sign up"),
+                    // DIVIDER
+                    Row(
+                      children: [
+                        Expanded(child: Divider(color: Colors.grey[300])),
+                        const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 10),
+                          child: Text("OR"),
+                        ),
+                        Expanded(child: Divider(color: Colors.grey[300])),
+                      ],
                     ),
-                  ),
-                ],
+
+                    const SizedBox(height: 20),
+
+                    // GOOGLE BUTTON
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        style: OutlinedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        onPressed: () {},
+                        icon: const Icon(Icons.g_mobiledata, size: 28),
+                        label: const Text("Continue with Google"),
+                      ),
+                    ),
+
+                    const Spacer(),
+
+                    // SIGN UP
+                    Center(
+                      child: TextButton(
+                        onPressed: () {},
+                        child: const Text("Don’t have an account? Sign up"),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
