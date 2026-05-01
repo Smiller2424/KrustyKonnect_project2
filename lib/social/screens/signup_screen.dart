@@ -163,7 +163,7 @@ class _SignupScreenState extends State<SignupScreen> {
             ),
           ),
 
-          // FORM (SCROLLABLE FIX)
+          // FORM 
           Expanded(
             child: SingleChildScrollView(
               child: Transform.translate(
