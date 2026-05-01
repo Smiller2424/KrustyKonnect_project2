@@ -17,7 +17,7 @@ class _LoginScreenState extends State<LoginScreen> {
   bool isPasswordHidden = true;
   bool isLoading = false;
 
-  // 🔐 LOGIN FUNCTION
+  // LOGIN FUNCTION
   Future<void> handleLogin() async {
     final email = emailController.text.trim();
     final password = passwordController.text.trim();
@@ -112,7 +112,7 @@ class _LoginScreenState extends State<LoginScreen> {
       body: Column(
         children: [
 
-          // 🔥 HEADER
+          // HEADER
           Container(
             height: 240,
             width: double.infinity,
