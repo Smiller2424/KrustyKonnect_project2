@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import '../shared/theme/app_theme.dart';
-import '../shared/constants/app_routes.dart';
-import 'home_shell.dart';
 
 class KrustyKonnectApp extends StatelessWidget {
   const KrustyKonnectApp({super.key});
