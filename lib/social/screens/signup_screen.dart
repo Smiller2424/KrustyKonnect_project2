@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../../app/home_shell.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
 
   @override
- State<SignupScreen> createState() => _SignupScreenState();
+  State<SignupScreen> createState() => _SignupScreenState();
 }
 
 class _SignupScreenState extends State<SignupScreen> {
@@ -16,11 +17,13 @@ class _SignupScreenState extends State<SignupScreen> {
   bool isPasswordHidden = true;
   bool isLoading = false;
 
+  // SIGNUP FUNCTION
   void handleSignup() async {
     final email = emailController.text.trim();
     final password = passwordController.text.trim();
     final confirm = confirmController.text.trim();
 
+    // 🔹 Validation
     if (email.isEmpty || password.isEmpty || confirm.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Please fill all fields")),
@@ -47,20 +50,31 @@ class _SignupScreenState extends State<SignupScreen> {
 
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Account created successfully")),
+      
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const HomeShell(),
+        ),
       );
 
-      Navigator.pop(context); // go back to login
     } on FirebaseAuthException catch (e) {
       if (!mounted) return;
 
       String message = "Signup failed";
 
-      if (e.code == 'email-already-in-use') {
-        message = "Email already in use";
-      } else if (e.code == 'weak-password') {
-        message = "Password is too weak";
+      switch (e.code) {
+        case 'email-already-in-use':
+          message = "Email already in use";
+          break;
+        case 'weak-password':
+          message = "Password is too weak";
+          break;
+        case 'invalid-email':
+          message = "Invalid email format";
+          break;
+        default:
+          message = e.message ?? "Something went wrong";
       }
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -75,6 +89,7 @@ class _SignupScreenState extends State<SignupScreen> {
     }
   }
 
+  // INPUT FIELD BUILDER
   Widget buildInput({
     required TextEditingController controller,
     required String hint,
@@ -127,14 +142,17 @@ class _SignupScreenState extends State<SignupScreen> {
 
           // HEADER
           Container(
-            height: 220,
+            height: 240,
             width: double.infinity,
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
                   Theme.of(context).colorScheme.primary,
                   const Color(0xFF3A7BD5),
+                  const Color(0xFF00B4DB),
                 ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
             ),
             child: const Padding(
@@ -145,7 +163,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   "Create Account",
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 28,
+                    fontSize: 30,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -153,6 +171,7 @@ class _SignupScreenState extends State<SignupScreen> {
             ),
           ),
 
+          // FORM
           Expanded(
             child: Transform.translate(
               offset: const Offset(0, -30),
@@ -163,12 +182,35 @@ class _SignupScreenState extends State<SignupScreen> {
                   borderRadius: const BorderRadius.vertical(
                     top: Radius.circular(24),
                   ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.1),
+                      blurRadius: 10,
+                      offset: const Offset(0, -3),
+                    ),
+                  ],
                 ),
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
 
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 10),
 
+                    Text(
+                      "Create Account",
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+
+                    const SizedBox(height: 6),
+
+                    Text(
+                      "Sign up to get started",
+                      style: TextStyle(color: Colors.grey[600]),
+                    ),
+
+                    const SizedBox(height: 30),
+
+                    // EMAIL
                     buildInput(
                       controller: emailController,
                       hint: "Email",
@@ -177,6 +219,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
                     const SizedBox(height: 16),
 
+                    // PASSWORD
                     buildInput(
                       controller: passwordController,
                       hint: "Password",
@@ -186,6 +229,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
                     const SizedBox(height: 16),
 
+                    // CONFIRM
                     buildInput(
                       controller: confirmController,
                       hint: "Confirm Password",
@@ -195,23 +239,41 @@ class _SignupScreenState extends State<SignupScreen> {
 
                     const SizedBox(height: 24),
 
+                    // SIGNUP BUTTON
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor:
+                              Theme.of(context).colorScheme.primary,
+                          foregroundColor: Colors.white,
+                          elevation: 4,
+                          shadowColor: Colors.black.withValues(alpha: 0.2),
+                        ),
                         onPressed: isLoading ? null : handleSignup,
                         child: isLoading
-                            ? const CircularProgressIndicator()
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              )
                             : const Text("Sign Up"),
                       ),
                     ),
 
                     const Spacer(),
 
-                    TextButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      child: const Text("Already have an account? Sign in"),
+                    // BACK TO LOGIN
+                    Center(
+                      child: TextButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        child: const Text("Already have an account? Sign in"),
+                      ),
                     ),
                   ],
                 ),
