@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../app/home_shell.dart';
+import 'signup_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -21,7 +22,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final email = emailController.text.trim();
     final password = passwordController.text.trim();
 
-    // 🔹 Basic validation
+    // Basic validation
     if (email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Please enter email and password")),
@@ -117,6 +118,12 @@ class _LoginScreenState extends State<LoginScreen> {
                         : Icons.visibility,
                   ),
                   onPressed: () {
+                     Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const SignupScreen(),
+                      ),
+                    );
                     setState(() {
                       isPasswordHidden = !isPasswordHidden;
                     });
