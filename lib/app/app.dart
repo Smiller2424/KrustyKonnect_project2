@@ -12,10 +12,9 @@ class KrustyKonnectApp extends StatelessWidget {
       title: 'KrustyKonnect',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
-      initialRoute: AppRoutes.home,
-      routes: {
-        AppRoutes.home: (context) => const HomeShell(),
-      },
+      home: Scaffold(
+        body: Center(child: Text("App is running")),
+      ),
     );
   }
 }
