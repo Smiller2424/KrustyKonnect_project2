@@ -19,11 +19,55 @@ class _LoginScreenState extends State<LoginScreen> {
       isLoading = true;
     });
 
-    await Future.delayed(const Duration(seconds: 2)); // simulate loading
+    await Future.delayed(const Duration(seconds: 2));
 
     setState(() {
       isLoading = false;
     });
+  }
+
+  Widget buildInput({
+    required TextEditingController controller,
+    required String hint,
+    required IconData icon,
+    bool isPassword = false,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: TextField(
+        controller: controller,
+        obscureText: isPassword ? isPasswordHidden : false,
+        decoration: InputDecoration(
+          hintText: hint,
+          border: InputBorder.none,
+          prefixIcon: Icon(icon),
+          suffixIcon: isPassword
+              ? IconButton(
+                  icon: Icon(
+                    isPasswordHidden
+                        ? Icons.visibility_off
+                        : Icons.visibility,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      isPasswordHidden = !isPasswordHidden;
+                    });
+                  },
+                )
+              : null,
+        ),
+      ),
+    );
   }
 
   @override
@@ -32,7 +76,7 @@ class _LoginScreenState extends State<LoginScreen> {
       body: Column(
         children: [
 
-          // TOP SECTION (BRANDING)
+          // TOP GRADIENT HEADER
           Container(
             height: 240,
             width: double.infinity,
@@ -40,7 +84,7 @@ class _LoginScreenState extends State<LoginScreen> {
               gradient: LinearGradient(
                 colors: [
                   Theme.of(context).colorScheme.primary,
-                  Theme.of(context).colorScheme.primary.withOpacity(0.7),
+                  const Color(0xFF3A7BD5),
                 ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
@@ -62,16 +106,23 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ),
 
-          // FORM SECTION
+          // FLOATING FORM CONTAINER
           Expanded(
             child: Container(
-              width: double.infinity,
+              margin: const EdgeInsets.only(top: -30),
               padding: const EdgeInsets.all(24),
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.vertical(
+              decoration: BoxDecoration(
+                color: Colors.grey[100],
+                borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(24),
                 ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.1),
+                    blurRadius: 10,
+                    offset: const Offset(0, -3),
+                  ),
+                ],
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -87,43 +138,27 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(height: 6),
 
                   Text(
-                    "Login to your account",
+                    "Sign in to continue",
                     style: TextStyle(color: Colors.grey[600]),
                   ),
 
                   const SizedBox(height: 30),
 
                   // EMAIL
-                  TextField(
+                  buildInput(
                     controller: emailController,
-                    decoration: const InputDecoration(
-                      hintText: "Email",
-                      prefixIcon: Icon(Icons.email),
-                    ),
+                    hint: "Email",
+                    icon: Icons.email,
                   ),
 
                   const SizedBox(height: 16),
 
                   // PASSWORD
-                  TextField(
+                  buildInput(
                     controller: passwordController,
-                    obscureText: isPasswordHidden,
-                    decoration: InputDecoration(
-                      hintText: "Password",
-                      prefixIcon: const Icon(Icons.lock),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          isPasswordHidden
-                              ? Icons.visibility_off
-                              : Icons.visibility,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            isPasswordHidden = !isPasswordHidden;
-                          });
-                        },
-                      ),
-                    ),
+                    hint: "Password",
+                    icon: Icons.lock,
+                    isPassword: true,
                   ),
 
                   const SizedBox(height: 12),
@@ -139,16 +174,25 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   const SizedBox(height: 10),
 
-                  // LOGIN BUTTON
+                  // LOGIN BUTTON (IMPROVED)
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor:
+                            Theme.of(context).colorScheme.primary,
+                        foregroundColor: Colors.white,
+                        elevation: 3,
+                      ),
                       onPressed: isLoading ? null : handleLogin,
                       child: isLoading
                           ? const SizedBox(
                               height: 20,
                               width: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
                             )
                           : const Text("Login"),
                     ),
@@ -174,6 +218,11 @@ class _LoginScreenState extends State<LoginScreen> {
                   SizedBox(
                     width: double.infinity,
                     child: OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
                       onPressed: () {},
                       icon: const Icon(Icons.g_mobiledata, size: 28),
                       label: const Text("Continue with Google"),
