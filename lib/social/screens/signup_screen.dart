@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../../app/home_shell.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'profile_setup_screen.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -10,15 +11,15 @@ class SignupScreen extends StatefulWidget {
 }
 
 class _SignupScreenState extends State<SignupScreen> {
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
-  final TextEditingController confirmController = TextEditingController();
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+  final confirmController = TextEditingController();
 
   bool isPasswordHidden = true;
   bool isConfirmHidden = true;
   bool isLoading = false;
 
-  void handleSignup() async {
+  Future<void> handleSignup() async {
     final email = emailController.text.trim();
     final password = passwordController.text.trim();
     final confirm = confirmController.text.trim();
@@ -37,24 +38,39 @@ class _SignupScreenState extends State<SignupScreen> {
       return;
     }
 
-    setState(() {
-      isLoading = true;
-    });
+    setState(() => isLoading = true);
 
     try {
-      await FirebaseAuth.instance.createUserWithEmailAndPassword(
+      // CREATE AUTH USER
+      final credential = await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
 
+      final user = credential.user;
+
+      // CREATE FIRESTORE USER DOCUMENT
+      if (user != null) {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .set({
+          'email': email,
+          'createdAt': Timestamp.now(),
+        });
+      }
+
       if (!mounted) return;
 
+      // GO TO PROFILE SETUP
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => const HomeShell(),
+          builder: (_) => const ProfileSetupScreen(),
         ),
       );
+
     } on FirebaseAuthException catch (e) {
       if (!mounted) return;
 
@@ -65,7 +81,10 @@ class _SignupScreenState extends State<SignupScreen> {
           message = "Email already in use";
           break;
         case 'weak-password':
-          message = "Password is too weak";
+          message = "Password too weak";
+          break;
+        case 'invalid-email':
+          message = "Invalid email";
           break;
         default:
           message = e.message ?? "Something went wrong";
@@ -75,11 +94,7 @@ class _SignupScreenState extends State<SignupScreen> {
         SnackBar(content: Text(message)),
       );
     } finally {
-      if (mounted) {
-        setState(() {
-          isLoading = false;
-        });
-      }
+      if (mounted) setState(() => isLoading = false);
     }
   }
 
@@ -132,7 +147,7 @@ class _SignupScreenState extends State<SignupScreen> {
       body: Column(
         children: [
 
-          // HEADER
+          // 🔥 HEADER
           Container(
             height: 240,
             width: double.infinity,
@@ -143,8 +158,6 @@ class _SignupScreenState extends State<SignupScreen> {
                   const Color(0xFF3A7BD5),
                   const Color(0xFF00B4DB),
                 ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
               ),
             ),
             child: const Padding(
@@ -155,7 +168,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   "Create Account",
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 30,
+                    fontSize: 28,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -163,46 +176,25 @@ class _SignupScreenState extends State<SignupScreen> {
             ),
           ),
 
-          // FORM 
+          // FORM
           Expanded(
             child: SingleChildScrollView(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom,
+              ),
               child: Transform.translate(
                 offset: const Offset(0, -30),
                 child: Container(
-                  padding: const EdgeInsets.fromLTRB(24, 24, 24, 40),
+                  padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
                     color: Colors.grey[100],
                     borderRadius: const BorderRadius.vertical(
                       top: Radius.circular(24),
                     ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.1),
-                        blurRadius: 10,
-                        offset: const Offset(0, -3),
-                      ),
-                    ],
                   ),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-
-                      const SizedBox(height: 10),
-
-                      Text(
-                        "Create Account",
-                        style: Theme.of(context).textTheme.titleLarge,
-                      ),
-
-                      const SizedBox(height: 6),
-
-                      Text(
-                        "Sign up to get started",
-                        style: TextStyle(color: Colors.grey[600]),
-                      ),
-
-                      const SizedBox(height: 30),
 
                       buildInput(
                         controller: emailController,
@@ -241,37 +233,22 @@ class _SignupScreenState extends State<SignupScreen> {
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor:
-                                Theme.of(context).colorScheme.primary,
-                            foregroundColor: Colors.white,
-                            elevation: 4,
-                          ),
                           onPressed: isLoading ? null : handleSignup,
                           child: isLoading
-                              ? const SizedBox(
-                                  height: 20,
-                                  width: 20,
-                                  child: CircularProgressIndicator(
-                                    color: Colors.white,
-                                    strokeWidth: 2,
-                                  ),
+                              ? const CircularProgressIndicator(
+                                  color: Colors.white,
                                 )
                               : const Text("Create Account"),
                         ),
                       ),
 
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 10),
 
-                      Center(
-                        child: TextButton(
-                          onPressed: () {
-                            Navigator.pop(context);
-                          },
-                          child: const Text(
-                            "Already have an account? Sign in",
-                          ),
-                        ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        child: const Text("Already have an account? Sign in"),
                       ),
                     ],
                   ),
