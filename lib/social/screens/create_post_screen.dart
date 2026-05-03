@@ -1,4 +1,6 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../connection/services/post_service.dart';
 
 class CreatePostScreen extends StatefulWidget {
@@ -14,7 +16,20 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
 
   final PostService _postService = PostService();
 
+  File? selectedImage;
   bool isLoading = false;
+
+  Future<void> pickImage() async {
+    final picked = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+    );
+
+    if (picked != null) {
+      setState(() {
+        selectedImage = File(picked.path);
+      });
+    }
+  }
 
   void scrollToBottom() {
     Future.delayed(const Duration(milliseconds: 250), () {
@@ -29,9 +44,9 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
   Future<void> handlePost() async {
     final caption = captionController.text.trim();
 
-    if (caption.isEmpty) {
+    if (caption.isEmpty && selectedImage == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Caption cannot be empty")),
+        const SnackBar(content: Text("Add caption or image")),
       );
       return;
     }
@@ -39,9 +54,10 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
     setState(() => isLoading = true);
 
     try {
-      await _postService.createPost(caption);
+      await _postService.createPost(caption, selectedImage);
 
       captionController.clear();
+      selectedImage = null;
 
       if (!mounted) return;
 
@@ -70,7 +86,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
         body: Column(
           children: [
 
-            // HEADER 
+            // HEADER
             AnimatedContainer(
               duration: const Duration(milliseconds: 250),
               height: isKeyboardOpen ? 140 : 220,
@@ -100,7 +116,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
               ),
             ),
 
-            // FORM
+            // BODY
             Expanded(
               child: SingleChildScrollView(
                 controller: scrollController,
@@ -119,6 +135,31 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                     ),
                     child: Column(
                       children: [
+
+                        GestureDetector(
+                          onTap: pickImage,
+                          child: Container(
+                            height: 180,
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              color: Colors.grey[300],
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: selectedImage != null
+                                ? ClipRRect(
+                                    borderRadius: BorderRadius.circular(12),
+                                    child: Image.file(
+                                      selectedImage!,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  )
+                                : const Center(
+                                    child: Icon(Icons.add_a_photo, size: 40),
+                                  ),
+                          ),
+                        ),
+
+                        const SizedBox(height: 16),
 
                         Container(
                           decoration: BoxDecoration(
