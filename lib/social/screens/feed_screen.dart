@@ -4,12 +4,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../connection/repositories/post_repository.dart';
 import '../../connection/screens/widgets/post_card.dart';
 
+
 class FeedScreen extends StatelessWidget {
   const FeedScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final PostRepository _postRepository = PostRepository();
+    final PostRepository postRepository = PostRepository();
 
     return Scaffold(
       body: Column(
@@ -47,7 +48,7 @@ class FeedScreen extends StatelessWidget {
           // FEED CONTENT
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
-              stream: _postRepository.getPosts(), 
+              stream: postRepository.getPosts(), 
               builder: (context, snapshot) {
 
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -65,9 +66,9 @@ class FeedScreen extends StatelessWidget {
                 return ListView.builder(
                   itemCount: posts.length,
                   itemBuilder: (context, index) {
-                    final post =
-                        posts[index].data() as Map<String, dynamic>;
-
+                    final doc = posts[index];
+                    final post = doc.data() as Map<String, dynamic>;
+                    post['id'] = doc.id;
                     //  USING POST CARD
                     return PostCard(post: post);
                   },

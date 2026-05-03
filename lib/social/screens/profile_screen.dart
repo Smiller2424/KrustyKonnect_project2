@@ -5,8 +5,9 @@ import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'dart:io';
 
+import 'edit_profile_screen.dart';
 import 'login_screen.dart';
-import 'profile_setup_screen.dart';
+
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -121,7 +122,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => const ProfileSetupScreen(),
+        builder: (_) => const EditProfileScreen(),
       ),
     );
   }
