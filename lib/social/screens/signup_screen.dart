@@ -174,7 +174,7 @@ class _SignupScreenState extends State<SignupScreen> {
               ),
             ),
 
-            // 🔥 FORM
+            // FORM
             Expanded(
               child: SingleChildScrollView(
                 controller: scrollController,
