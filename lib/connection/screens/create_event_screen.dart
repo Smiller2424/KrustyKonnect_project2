@@ -9,46 +9,65 @@ class CreateEventScreen extends StatefulWidget {
 }
 
 class _CreateEventScreenState extends State<CreateEventScreen> {
+  final EventService _eventService = EventService();
+
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _locationController = TextEditingController();
 
-  DateTime? _selectedDate;
-  final EventService _eventService = EventService();
+  DateTime? _selectedDateTime;
 
-  Future<void> _pickDate() async {
-    final picked = await showDatePicker(
+  Future<void> _pickDateTime() async {
+    final pickedDate = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
       firstDate: DateTime.now(),
       lastDate: DateTime(2100),
     );
 
-    if(picked != null) {
-      setState(() {
-        _selectedDate = picked;
-      });
-    }
+    if (pickedDate == null) return;
+
+    final pickedTime = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+    );
+
+    if (pickedTime == null) return;
+
+    setState(() {
+      _selectedDateTime = DateTime(
+        pickedDate.year,
+        pickedDate.month,
+        pickedDate.day,
+        pickedTime.hour,
+        pickedTime.minute,
+      );
+    });
   }
 
-  Future<void> _createEvent() async {
-    if (_selectedDate == null) return;
+  void _createEvent() async {
+    if (_titleController.text.isEmpty || _selectedDateTime == null) return;
 
     await _eventService.createEvent(
       title: _titleController.text,
       description: _descriptionController.text,
       location: _locationController.text,
-      date: _selectedDate!,
-      createdBy: "testUser" //REPLACE LATER W AUTH USER
+      date: _selectedDateTime!,
+      createdBy: 'demoUser',
     );
-    if (!mounted) return;
+
     Navigator.pop(context);
   }
 
-  @override 
+  @override
   Widget build(BuildContext context) {
+    String dateText = _selectedDateTime == null
+        ? "Select Event Date & Time"
+        : "${_selectedDateTime!.month}/${_selectedDateTime!.day}/${_selectedDateTime!.year} "
+          "${TimeOfDay.fromDateTime(_selectedDateTime!).format(context)}";
+
     return Scaffold(
-      appBar: AppBar(title: const Text ("Create Event")),
+      appBar: AppBar(title: const Text("Create Event")),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -65,12 +84,15 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
               controller: _locationController,
               decoration: const InputDecoration(labelText: "Location"),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 16),
+
             ElevatedButton(
-              onPressed: _pickDate,
-              child: const Text("Select Event Date"),
+              onPressed: _pickDateTime,
+              child: Text(dateText),
             ),
-            const SizedBox(height: 8),
+
+            const SizedBox(height: 16),
+
             ElevatedButton(
               onPressed: _createEvent,
               child: const Text("Create Event"),

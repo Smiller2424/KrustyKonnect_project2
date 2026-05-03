@@ -15,9 +15,11 @@ class EventRepository {
     await _firestore.collection(_collection).add({
       'title': title,
       'description': description,
+      'location': location,
       'date': Timestamp.fromDate(date),
       'createdBy': createdBy,
       'createdAt': FieldValue.serverTimestamp(),
+      'rsvpUserIds': [],
     });
   }
 
@@ -39,7 +41,7 @@ class EventRepository {
       .collection('events')
       .doc(eventId)
       .update({
-        'attendees': isComing
+        'rsvpUserIds': isComing
           ? FieldValue.arrayUnion([userId])
           : FieldValue.arrayRemove([userId]),
       });

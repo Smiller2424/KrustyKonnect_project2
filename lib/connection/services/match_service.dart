@@ -11,6 +11,12 @@ class MatchResult {
 }
 
 class MatchService {
+  static List<String> _safeList(dynamic value) {
+    if (value is List) return List<String>.from(value);
+    if (value is String) return [value];
+    return [];
+  }
+
   static List<MatchResult> findMatches({
     required Map<String, dynamic> currentUser,
     required List<Map<String, dynamic>> candidates,
@@ -25,10 +31,8 @@ class MatchService {
       List<String> reasons = [];
 
       // --- courses ---
-      List<String> currentCourses =
-          List<String>.from(currentUser['courses'] ?? []);
-      List<String> candidateCourses =
-          List<String>.from(candidate['courses'] ?? []);
+      List<String> currentCourses = _safeList(currentUser['courses']);
+      List<String> candidateCourses = _safeList(candidate['courses']);
 
       var sharedCourses =
           currentCourses.where((c) => candidateCourses.contains(c)).toList();
@@ -40,10 +44,8 @@ class MatchService {
       }
 
       // --- availability ---
-      List<String> currentAvailability =
-          List<String>.from(currentUser['availability'] ?? []);
-      List<String> candidateAvailability =
-          List<String>.from(candidate['availability'] ?? []);
+      List<String> currentAvailability = _safeList(currentUser['availability']);
+      List<String> candidateAvailability = _safeList(candidate['availability']);
 
       var sharedAvailability = currentAvailability
           .where((a) => candidateAvailability.contains(a))
@@ -56,10 +58,8 @@ class MatchService {
       }
 
       // --- interests ---
-      List<String> currentInterests =
-          List<String>.from(currentUser['interests'] ?? []);
-      List<String> candidateInterests =
-          List<String>.from(candidate['interests'] ?? []);
+      List<String> currentInterests = _safeList(currentUser['interests']);
+      List<String> candidateInterests = _safeList(candidate['interests']);
 
       var sharedInterests = currentInterests
           .where((i) => candidateInterests.contains(i))
