@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../connection/repositories/post_repository.dart';
 import '../../connection/screens/widgets/post_card.dart';
-
+import '../../social/screens/create_post_screen.dart'; 
 
 class FeedScreen extends StatelessWidget {
   const FeedScreen({super.key});
@@ -69,7 +69,7 @@ class FeedScreen extends StatelessWidget {
                     final doc = posts[index];
                     final post = doc.data() as Map<String, dynamic>;
                     post['id'] = doc.id;
-                    //  USING POST CARD
+
                     return PostCard(post: post);
                   },
                 );
@@ -77,6 +77,19 @@ class FeedScreen extends StatelessWidget {
             ),
           ),
         ],
+      ),
+
+      //  FAB ADDED FOR CREATING NEW POSTS
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => const CreatePostScreen(),
+            ),
+          );
+        },
+        child: const Icon(Icons.add),
       ),
     );
   }
