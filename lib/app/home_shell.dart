@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 import '../social/screens/feed_screen.dart';
 import '../connection/screens/matches_screen.dart';
 import '../connection/screens/chat_list_screen.dart';
 import '../connection/screens/events_screen.dart';
 import '../social/screens/profile_screen.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 class HomeShell extends StatefulWidget {
   const HomeShell({super.key});
@@ -23,11 +24,36 @@ class _HomeShellState extends State<HomeShell> {
     EventsScreen(),
     ProfileScreen(),
   ];
+  User? user;
+
+  @override
+  void initState() {
+    super.initState();
+    user = FirebaseAuth.instance.currentUser;
+  }
 
   @override
   Widget build(BuildContext context) {
+    //  Prevent crash if user is null
+    if (user == null) {
+      return const Scaffold(
+        body: Center(child: Text("User not logged in")),
+      );
+    }
+
+    final List<Widget> screens = [
+      const FeedScreen(),
+      const MatchesScreen(),
+      ChatListScreen(currentUserId: user!.uid),
+      EventsScreen(),
+      const ProfileScreen(),
+    ];
+
     return Scaffold(
-      body: _screens[_currentIndex],
+      body: SafeArea(
+        child: screens[_currentIndex],
+      ),
+
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) {
@@ -36,12 +62,30 @@ class _HomeShellState extends State<HomeShell> {
           });
         },
         type: BottomNavigationBarType.fixed,
+        selectedItemColor: Theme.of(context).colorScheme.primary,
+        unselectedItemColor: Colors.grey,
+
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.dynamic_feed), label: 'Feed'),
-          BottomNavigationBarItem(icon: Icon(Icons.people), label: 'Matches'),
-          BottomNavigationBarItem(icon: Icon(Icons.chat_bubble), label: 'Chat'),
-          BottomNavigationBarItem(icon: Icon(Icons.event), label: 'Events'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.dynamic_feed),
+            label: 'Feed',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.people),
+            label: 'Matches',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.chat_bubble),
+            label: 'Chat',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.event),
+            label: 'Events',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'Profile',
+          ),
         ],
       ),
     );
