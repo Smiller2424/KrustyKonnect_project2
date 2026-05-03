@@ -1,24 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
-import 'signup_screen.dart';
 import 'profile_setup_screen.dart';
-import '../../app/home_shell.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+class SignupScreen extends StatefulWidget {
+  const SignupScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<SignupScreen> createState() => _SignupScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _SignupScreenState extends State<SignupScreen> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+  final confirmController = TextEditingController();
   final scrollController = ScrollController();
 
   bool isPasswordHidden = true;
+  bool isConfirmHidden = true;
   bool isLoading = false;
 
   void scrollToBottom() {
@@ -31,13 +30,21 @@ class _LoginScreenState extends State<LoginScreen> {
     });
   }
 
-  Future<void> handleLogin() async {
+  Future<void> handleSignup() async {
     final email = emailController.text.trim();
     final password = passwordController.text.trim();
+    final confirm = confirmController.text.trim();
 
-    if (email.isEmpty || password.isEmpty) {
+    if (email.isEmpty || password.isEmpty || confirm.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Please fill all fields")),
+      );
+      return;
+    }
+
+    if (password != confirm) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Passwords do not match")),
       );
       return;
     }
@@ -45,48 +52,37 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => isLoading = true);
 
     try {
-      //  LOGIN
-      final credential = await FirebaseAuth.instance
-          .signInWithEmailAndPassword(
+      final credential =
+          await FirebaseAuth.instance.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
 
       final user = credential.user;
 
-      if (user == null) return;
-
-      //  CHECK PROFILE IN FIRESTORE
-      final doc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .get();
+      if (user != null) {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .set({
+          'email': email,
+          'createdAt': Timestamp.now(),
+        });
+      }
 
       if (!mounted) return;
 
-      if (doc.exists && doc.data()?['name'] != null) {
-        // EXISTING USER
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (_) => const HomeShell(),
-          ),
-        );
-      } else {
-        // 🆕 NEW USER
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (_) => const ProfileSetupScreen(),
-          ),
-        );
-      }
-
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const ProfileSetupScreen(),
+        ),
+      );
     } on FirebaseAuthException catch (e) {
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.message ?? "Login failed")),
+        SnackBar(content: Text(e.message ?? "Signup failed")),
       );
     } finally {
       if (mounted) setState(() => isLoading = false);
@@ -148,7 +144,7 @@ class _LoginScreenState extends State<LoginScreen> {
         body: Column(
           children: [
 
-            // HEADER
+            // 🔥 HEADER
             AnimatedContainer(
               duration: const Duration(milliseconds: 250),
               height: isKeyboardOpen ? 140 : 240,
@@ -167,7 +163,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: Align(
                   alignment: Alignment.bottomLeft,
                   child: Text(
-                    "KrustyKonnect",
+                    "Create Account",
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 28,
@@ -200,14 +196,16 @@ class _LoginScreenState extends State<LoginScreen> {
                       children: [
 
                         const Text(
-                          "Welcome Back",
-                          style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                          "Create your account",
+                          style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold),
                         ),
 
                         const SizedBox(height: 6),
 
                         Text(
-                          "Sign in to continue",
+                          "Sign up to get started",
                           style: TextStyle(color: Colors.grey[600]),
                         ),
 
@@ -232,47 +230,30 @@ class _LoginScreenState extends State<LoginScreen> {
                           },
                         ),
 
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: TextButton(
-                            onPressed: () {},
-                            child: const Text("Forgot Password?"),
-                          ),
+                        buildInput(
+                          controller: confirmController,
+                          hint: "Confirm Password",
+                          icon: Icons.lock,
+                          isPassword: true,
+                          isHidden: isConfirmHidden,
+                          toggle: () {
+                            setState(() {
+                              isConfirmHidden = !isConfirmHidden;
+                            });
+                          },
                         ),
 
-                        const SizedBox(height: 10),
+                        const SizedBox(height: 20),
 
                         SizedBox(
                           width: double.infinity,
                           child: ElevatedButton(
-                            onPressed: isLoading ? null : handleLogin,
+                            onPressed: isLoading ? null : handleSignup,
                             child: isLoading
-                                ? const CircularProgressIndicator(color: Colors.white)
-                                : const Text("Login"),
-                          ),
-                        ),
-
-                        const SizedBox(height: 20),
-
-                        Row(
-                          children: [
-                            Expanded(child: Divider(color: Colors.grey[400])),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 8),
-                              child: Text("OR", style: TextStyle(color: Colors.grey[600])),
-                            ),
-                            Expanded(child: Divider(color: Colors.grey[400])),
-                          ],
-                        ),
-
-                        const SizedBox(height: 20),
-
-                        SizedBox(
-                          width: double.infinity,
-                          child: OutlinedButton.icon(
-                            onPressed: () {},
-                            icon: const Icon(Icons.g_mobiledata, size: 28),
-                            label: const Text("Continue with Google"),
+                                ? const CircularProgressIndicator(
+                                    color: Colors.white,
+                                  )
+                                : const Text("Create Account"),
                           ),
                         ),
 
@@ -281,14 +262,11 @@ class _LoginScreenState extends State<LoginScreen> {
                         Center(
                           child: TextButton(
                             onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => const SignupScreen(),
-                                ),
-                              );
+                              Navigator.pop(context);
                             },
-                            child: const Text("Don’t have an account? Sign up"),
+                            child: const Text(
+                              "Already have an account? Sign in",
+                            ),
                           ),
                         ),
                       ],
