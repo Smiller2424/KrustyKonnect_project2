@@ -12,7 +12,7 @@ Future<void> main() async {
   
   //adding notificaion feature
   final notificationService = NotificationService();
-  await notificationService.intialize();
+  await notificationService.initialize();
   
   runApp(KrustyKonnectApp());
 }

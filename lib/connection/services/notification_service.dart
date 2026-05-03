@@ -3,7 +3,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 class NotificationService {
   final FirebaseMessaging _messaging = FirebaseMessaging.instance;
 
-  Future<void> intialize() async{
+  Future<void> initialize() async {
     await _requestPermission();
     await saveDeviceToken();
 
@@ -11,6 +11,12 @@ class NotificationService {
       final title = message.notification?.title ?? 'New Notification';
       final body = message.notification?.body ?? '';
       print('Foreground Notification $title - $body');
+    });
+
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      final title = message.notification?.title ?? 'Notification Opened';
+      final body = message.notification?.body ?? '';
+      print('Opened Notification $title - $body');
     });
   }
 

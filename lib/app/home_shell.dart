@@ -17,6 +17,13 @@ class HomeShell extends StatefulWidget {
 class _HomeShellState extends State<HomeShell> {
   int _currentIndex = 0;
 
+  final List<Widget> _screens = [
+    FeedScreen(),
+    MatchesScreen(),
+    ChatListScreen(currentUserId: FirebaseAuth.instance.currentUser?.uid ?? ''),
+    EventsScreen(),
+    ProfileScreen(),
+  ];
   User? user;
 
   @override

@@ -5,9 +5,15 @@ class ChatService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  String get currentUserId => _auth.currentUser!.uid;
+  String? get currentUserId => _auth.currentUser?.uid;
 
   Stream<QuerySnapshot<Map<String, dynamic>>> getUserChats() {
+    //safe guarding chat screem
+    final userId = currentUserId;
+    if (userId == null) {
+      return const Stream.empty();
+    }
+    
     return _firestore
         .collection('chats')
         .where('memberIds', arrayContains: currentUserId)
