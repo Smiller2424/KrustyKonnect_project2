@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-
 import '../social/screens/feed_screen.dart';
+import '../social/screens/profile_screen.dart';
 import '../connection/screens/matches_screen.dart';
 import '../connection/screens/chat_list_screen.dart';
 import '../connection/screens/events_screen.dart';
-import '../social/screens/profile_screen.dart';
 
 class HomeShell extends StatefulWidget {
   const HomeShell({super.key});
@@ -16,7 +15,7 @@ class HomeShell extends StatefulWidget {
 class _HomeShellState extends State<HomeShell> {
   int _selectedIndex = 0;
 
-  final List<Widget> screens = [
+  final List<Widget> _screens = [
     FeedScreen(),
     MatchesScreen(),
     ChatListScreen(currentUserId: 'demoUser'),
