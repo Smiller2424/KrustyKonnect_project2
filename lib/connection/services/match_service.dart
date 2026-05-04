@@ -12,9 +12,26 @@ class MatchResult {
 
 class MatchService {
   static List<String> _safeList(dynamic value) {
-    if (value is List) return List<String>.from(value);
-    if (value is String) return [value];
+    if (value is List) {
+      return value
+          .map((item) => item.toString().trim())
+          .where((item) => item.isNotEmpty)
+          .toList();
+    }
+
+    if (value is String) {
+      return value
+          .split(',')
+          .map((item) => item.trim())
+          .where((item) => item.isNotEmpty)
+          .toList();
+    }
+
     return [];
+  }
+
+  static bool _matches(String a, String b) {
+    return a.trim().toLowerCase() == b.trim().toLowerCase();
   }
 
   static List<MatchResult> findMatches({
@@ -24,51 +41,48 @@ class MatchService {
     List<MatchResult> results = [];
 
     for (var candidate in candidates) {
-      // skip self
       if (candidate['id'] == currentUser['id']) continue;
 
       int score = 0;
       List<String> reasons = [];
 
-      // --- courses ---
       List<String> currentCourses = _safeList(currentUser['courses']);
       List<String> candidateCourses = _safeList(candidate['courses']);
 
-      var sharedCourses =
-          currentCourses.where((c) => candidateCourses.contains(c)).toList();
+      var sharedCourses = currentCourses
+          .where((course) =>
+              candidateCourses.any((candidateCourse) => _matches(course, candidateCourse)))
+          .toList();
 
       if (sharedCourses.isNotEmpty) {
-        int courseScore = sharedCourses.length * 3;
-        score += courseScore;
-        reasons.add("${sharedCourses.length} shared course(s)");
+        score += sharedCourses.length * 3;
+        reasons.add('Shared course: ${sharedCourses.join(', ')}');
       }
 
-      // --- availability ---
       List<String> currentAvailability = _safeList(currentUser['availability']);
       List<String> candidateAvailability = _safeList(candidate['availability']);
 
       var sharedAvailability = currentAvailability
-          .where((a) => candidateAvailability.contains(a))
+          .where((time) =>
+              candidateAvailability.any((candidateTime) => _matches(time, candidateTime)))
           .toList();
 
       if (sharedAvailability.isNotEmpty) {
-        int availabilityScore = sharedAvailability.length * 2;
-        score += availabilityScore;
-        reasons.add("${sharedAvailability.length} overlapping time slot(s)");
+        score += sharedAvailability.length * 2;
+        reasons.add('Overlapping availability: ${sharedAvailability.join(', ')}');
       }
 
-      // --- interests ---
       List<String> currentInterests = _safeList(currentUser['interests']);
       List<String> candidateInterests = _safeList(candidate['interests']);
 
       var sharedInterests = currentInterests
-          .where((i) => candidateInterests.contains(i))
+          .where((interest) =>
+              candidateInterests.any((candidateInterest) => _matches(interest, candidateInterest)))
           .toList();
 
       if (sharedInterests.isNotEmpty) {
-        int interestScore = sharedInterests.length * 1;
-        score += interestScore;
-        reasons.add("${sharedInterests.length} shared interest(s)");
+        score += sharedInterests.length;
+        reasons.add('Shared interest: ${sharedInterests.join(', ')}');
       }
 
       results.add(
@@ -80,10 +94,8 @@ class MatchService {
       );
     }
 
-    // sort highest score first
     results.sort((a, b) => b.score.compareTo(a.score));
 
-    // return top 5
     return results.take(5).toList();
   }
 }

@@ -1,6 +1,10 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+
+import '../repositories/chat_repository.dart';
 import '../services/match_service.dart';
 import '../services/user_service.dart';
+import 'chat_screen.dart';
 import 'widgets/match_card.dart';
 
 class MatchesScreen extends StatefulWidget {
@@ -12,6 +16,7 @@ class MatchesScreen extends StatefulWidget {
 
 class _MatchesScreenState extends State<MatchesScreen> {
   final UserService _userService = UserService();
+  final ChatRepository _chatRepository = ChatRepository();
 
   bool _isLoading = true;
   List<MatchResult> _matches = [];
@@ -26,6 +31,15 @@ class _MatchesScreenState extends State<MatchesScreen> {
   Future<void> _loadMatches() async {
     try {
       final users = await _userService.getAllUsers();
+      final currentUserId = FirebaseAuth.instance.currentUser?.uid;
+
+      if (currentUserId == null) {
+        setState(() {
+          _error = 'You must be logged in to view matches.';
+          _isLoading = false;
+        });
+        return;
+      }
 
       if (users.isEmpty) {
         setState(() {
@@ -35,7 +49,18 @@ class _MatchesScreenState extends State<MatchesScreen> {
         return;
       }
 
-      final currentUser = users.first;
+      final currentUser = users.firstWhere(
+        (user) => user['id'] == currentUserId,
+        orElse: () => {},
+      );
+
+      if (currentUser.isEmpty) {
+        setState(() {
+          _error = 'Current user profile was not found in Firestore.';
+          _isLoading = false;
+        });
+        return;
+      }
 
       final matches = MatchService.findMatches(
         currentUser: currentUser,
@@ -52,6 +77,30 @@ class _MatchesScreenState extends State<MatchesScreen> {
         _isLoading = false;
       });
     }
+  }
+
+  Future<void> _openChat(MatchResult match) async {
+    final currentUserId = FirebaseAuth.instance.currentUser?.uid;
+    final otherUserId = match.user['id'];
+
+    if (currentUserId == null || otherUserId == null) return;
+
+    final chatId = await _chatRepository.createOrOpenChat(
+      currentUserId: currentUserId,
+      otherUserId: otherUserId,
+    );
+
+    if (!mounted) return;
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ChatScreen(
+          chatId: chatId,
+          otherUserName: match.user['name'] ?? 'Chat',
+        ),
+      ),
+    );
   }
 
   @override
@@ -79,7 +128,10 @@ class _MatchesScreenState extends State<MatchesScreen> {
                   : ListView.builder(
                       itemCount: _matches.length,
                       itemBuilder: (context, index) {
-                        return MatchCard(match: _matches[index]);
+                        return MatchCard(
+                          match: _matches[index],
+                          onTap: () => _openChat(_matches[index]),
+                        );
                       },
                     ),
     );

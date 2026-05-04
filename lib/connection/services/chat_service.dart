@@ -8,16 +8,15 @@ class ChatService {
   String? get currentUserId => _auth.currentUser?.uid;
 
   Stream<QuerySnapshot<Map<String, dynamic>>> getUserChats() {
-    //safe guarding chat screem
     final userId = currentUserId;
     if (userId == null) {
       return const Stream.empty();
     }
-    
+
     return _firestore
         .collection('chats')
-        .where('memberIds', arrayContains: currentUserId)
-        .orderBy('lastMessageAt', descending: true)
+        .where('participantIds', arrayContains: userId)
+        .orderBy('updatedAt', descending: true)
         .snapshots();
   }
 
@@ -45,7 +44,9 @@ class ChatService {
 
     await _firestore.collection('chats').doc(chatId).update({
       'lastMessage': trimmedText,
+      'lastMessageSenderId': currentUserId,
       'lastMessageAt': FieldValue.serverTimestamp(),
+      'updatedAt': FieldValue.serverTimestamp(),
     });
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/chat_service.dart';
+import 'chat_screen.dart';
 
 class ChatListScreen extends StatelessWidget {
   const ChatListScreen({
@@ -35,7 +36,8 @@ class ChatListScreen extends StatelessWidget {
           return ListView.builder(
             itemCount: chats.length,
             itemBuilder: (context, index) {
-              final chat = chats[index].data();
+              final chatDoc = chats[index];
+              final chat = chatDoc.data();
 
               final lastMessage = chat['lastMessage'] ?? '';
               final timestamp = chat['updatedAt'];
@@ -56,7 +58,15 @@ class ChatListScreen extends StatelessWidget {
                       )
                     : null,
                 onTap: () {
-                  // NEXT DAY (Day 4) → navigate to ChatScreen
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ChatScreen(
+                        chatId: chatDoc.id,
+                        otherUserName: 'Chat',
+                      ),
+                    ),
+                  );
                 },
               );
             },
